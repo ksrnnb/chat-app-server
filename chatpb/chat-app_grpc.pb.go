@@ -18,7 +18,10 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ChatAppServiceClient interface {
+	GetMessages(ctx context.Context, in *GetMessagesRequest, opts ...grpc.CallOption) (ChatAppService_GetMessagesClient, error)
 	CreateMessage(ctx context.Context, in *CreateMessageRequest, opts ...grpc.CallOption) (*CreateMessageResponse, error)
+	// 動作確認用
+	HelloMessage(ctx context.Context, in *HelloRequest, opts ...grpc.CallOption) (*HelloResponse, error)
 }
 
 type chatAppServiceClient struct {
@@ -27,6 +30,38 @@ type chatAppServiceClient struct {
 
 func NewChatAppServiceClient(cc grpc.ClientConnInterface) ChatAppServiceClient {
 	return &chatAppServiceClient{cc}
+}
+
+func (c *chatAppServiceClient) GetMessages(ctx context.Context, in *GetMessagesRequest, opts ...grpc.CallOption) (ChatAppService_GetMessagesClient, error) {
+	stream, err := c.cc.NewStream(ctx, &ChatAppService_ServiceDesc.Streams[0], "/chatpb.ChatAppService/GetMessages", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &chatAppServiceGetMessagesClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type ChatAppService_GetMessagesClient interface {
+	Recv() (*GetMessagesResponse, error)
+	grpc.ClientStream
+}
+
+type chatAppServiceGetMessagesClient struct {
+	grpc.ClientStream
+}
+
+func (x *chatAppServiceGetMessagesClient) Recv() (*GetMessagesResponse, error) {
+	m := new(GetMessagesResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 func (c *chatAppServiceClient) CreateMessage(ctx context.Context, in *CreateMessageRequest, opts ...grpc.CallOption) (*CreateMessageResponse, error) {
@@ -38,11 +73,23 @@ func (c *chatAppServiceClient) CreateMessage(ctx context.Context, in *CreateMess
 	return out, nil
 }
 
+func (c *chatAppServiceClient) HelloMessage(ctx context.Context, in *HelloRequest, opts ...grpc.CallOption) (*HelloResponse, error) {
+	out := new(HelloResponse)
+	err := c.cc.Invoke(ctx, "/chatpb.ChatAppService/HelloMessage", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ChatAppServiceServer is the server API for ChatAppService service.
 // All implementations must embed UnimplementedChatAppServiceServer
 // for forward compatibility
 type ChatAppServiceServer interface {
+	GetMessages(*GetMessagesRequest, ChatAppService_GetMessagesServer) error
 	CreateMessage(context.Context, *CreateMessageRequest) (*CreateMessageResponse, error)
+	// 動作確認用
+	HelloMessage(context.Context, *HelloRequest) (*HelloResponse, error)
 	mustEmbedUnimplementedChatAppServiceServer()
 }
 
@@ -50,8 +97,14 @@ type ChatAppServiceServer interface {
 type UnimplementedChatAppServiceServer struct {
 }
 
+func (UnimplementedChatAppServiceServer) GetMessages(*GetMessagesRequest, ChatAppService_GetMessagesServer) error {
+	return status.Errorf(codes.Unimplemented, "method GetMessages not implemented")
+}
 func (UnimplementedChatAppServiceServer) CreateMessage(context.Context, *CreateMessageRequest) (*CreateMessageResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateMessage not implemented")
+}
+func (UnimplementedChatAppServiceServer) HelloMessage(context.Context, *HelloRequest) (*HelloResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method HelloMessage not implemented")
 }
 func (UnimplementedChatAppServiceServer) mustEmbedUnimplementedChatAppServiceServer() {}
 
@@ -64,6 +117,27 @@ type UnsafeChatAppServiceServer interface {
 
 func RegisterChatAppServiceServer(s grpc.ServiceRegistrar, srv ChatAppServiceServer) {
 	s.RegisterService(&ChatAppService_ServiceDesc, srv)
+}
+
+func _ChatAppService_GetMessages_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(GetMessagesRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(ChatAppServiceServer).GetMessages(m, &chatAppServiceGetMessagesServer{stream})
+}
+
+type ChatAppService_GetMessagesServer interface {
+	Send(*GetMessagesResponse) error
+	grpc.ServerStream
+}
+
+type chatAppServiceGetMessagesServer struct {
+	grpc.ServerStream
+}
+
+func (x *chatAppServiceGetMessagesServer) Send(m *GetMessagesResponse) error {
+	return x.ServerStream.SendMsg(m)
 }
 
 func _ChatAppService_CreateMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -84,6 +158,24 @@ func _ChatAppService_CreateMessage_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ChatAppService_HelloMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(HelloRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChatAppServiceServer).HelloMessage(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/chatpb.ChatAppService/HelloMessage",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChatAppServiceServer).HelloMessage(ctx, req.(*HelloRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ChatAppService_ServiceDesc is the grpc.ServiceDesc for ChatAppService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -95,7 +187,17 @@ var ChatAppService_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "CreateMessage",
 			Handler:    _ChatAppService_CreateMessage_Handler,
 		},
+		{
+			MethodName: "HelloMessage",
+			Handler:    _ChatAppService_HelloMessage_Handler,
+		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "GetMessages",
+			Handler:       _ChatAppService_GetMessages_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "chat-app.proto",
 }
