@@ -10,7 +10,8 @@ import (
 )
 
 const (
-	port = ":50051"
+	// port = ":50051"
+	port = ":9000"
 )
 
 type server struct {
@@ -55,6 +56,17 @@ func (s *server) CreateMessage(ctx context.Context, req *chatpb.CreateMessageReq
 
 	res := &chatpb.CreateMessageResponse{
 		Message: messageItem,
+	}
+
+	return res, nil
+}
+
+func (s *server) HelloMessage(ctx context.Context, req *chatpb.HelloRequest) (*chatpb.HelloResponse, error) {
+	name := req.GetName()
+
+
+	res := &chatpb.HelloResponse{
+		Message: "Hello, " + name,
 	}
 
 	return res, nil
