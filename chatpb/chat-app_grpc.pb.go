@@ -20,6 +20,8 @@ const _ = grpc.SupportPackageIsVersion7
 type ChatAppServiceClient interface {
 	GetMessages(ctx context.Context, in *GetMessagesRequest, opts ...grpc.CallOption) (ChatAppService_GetMessagesClient, error)
 	CreateMessage(ctx context.Context, in *CreateMessageRequest, opts ...grpc.CallOption) (*CreateMessageResponse, error)
+	// ユーザーのログイン処理
+	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
 	// 動作確認用
 	HelloMessage(ctx context.Context, in *HelloRequest, opts ...grpc.CallOption) (*HelloResponse, error)
 }
@@ -73,6 +75,15 @@ func (c *chatAppServiceClient) CreateMessage(ctx context.Context, in *CreateMess
 	return out, nil
 }
 
+func (c *chatAppServiceClient) Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error) {
+	out := new(LoginResponse)
+	err := c.cc.Invoke(ctx, "/chatpb.ChatAppService/Login", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *chatAppServiceClient) HelloMessage(ctx context.Context, in *HelloRequest, opts ...grpc.CallOption) (*HelloResponse, error) {
 	out := new(HelloResponse)
 	err := c.cc.Invoke(ctx, "/chatpb.ChatAppService/HelloMessage", in, out, opts...)
@@ -88,6 +99,8 @@ func (c *chatAppServiceClient) HelloMessage(ctx context.Context, in *HelloReques
 type ChatAppServiceServer interface {
 	GetMessages(*GetMessagesRequest, ChatAppService_GetMessagesServer) error
 	CreateMessage(context.Context, *CreateMessageRequest) (*CreateMessageResponse, error)
+	// ユーザーのログイン処理
+	Login(context.Context, *LoginRequest) (*LoginResponse, error)
 	// 動作確認用
 	HelloMessage(context.Context, *HelloRequest) (*HelloResponse, error)
 	mustEmbedUnimplementedChatAppServiceServer()
@@ -102,6 +115,9 @@ func (UnimplementedChatAppServiceServer) GetMessages(*GetMessagesRequest, ChatAp
 }
 func (UnimplementedChatAppServiceServer) CreateMessage(context.Context, *CreateMessageRequest) (*CreateMessageResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateMessage not implemented")
+}
+func (UnimplementedChatAppServiceServer) Login(context.Context, *LoginRequest) (*LoginResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
 }
 func (UnimplementedChatAppServiceServer) HelloMessage(context.Context, *HelloRequest) (*HelloResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method HelloMessage not implemented")
@@ -158,6 +174,24 @@ func _ChatAppService_CreateMessage_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ChatAppService_Login_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LoginRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChatAppServiceServer).Login(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/chatpb.ChatAppService/Login",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChatAppServiceServer).Login(ctx, req.(*LoginRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _ChatAppService_HelloMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(HelloRequest)
 	if err := dec(in); err != nil {
@@ -186,6 +220,10 @@ var ChatAppService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateMessage",
 			Handler:    _ChatAppService_CreateMessage_Handler,
+		},
+		{
+			MethodName: "Login",
+			Handler:    _ChatAppService_Login_Handler,
 		},
 		{
 			MethodName: "HelloMessage",
