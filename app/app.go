@@ -4,8 +4,10 @@ import (
 	"log"
 	"net"
 
+	"github.com/joho/godotenv"
 	"github.com/ksrnnb/chat-app-server/adapter"
 	"github.com/ksrnnb/chat-app-server/chatpb"
+	"github.com/ksrnnb/chat-app-server/infrastructure/database"
 	"github.com/ksrnnb/chat-app-server/infrastructure/repository"
 	"github.com/ksrnnb/chat-app-server/usecase"
 	"google.golang.org/grpc"
@@ -16,6 +18,12 @@ const (
 )
 
 func Start() {
+	err := godotenv.Load()
+
+	if err != nil {
+		log.Fatal("Error while loading .env file")
+	}
+
 	lis, err := net.Listen("tcp", port)
 
 	if err != nil {
@@ -23,8 +31,8 @@ func Start() {
 	}
 
 	s := grpc.NewServer()
-
-	repository := repository.NewUserRepository()
+	sqlHandler := database.NewSqlHandler()
+	repository := repository.NewUserRepository(sqlHandler)
 	interactor := usecase.NewUserInteractor(repository)
 	server := adapter.NewServer(interactor)
 

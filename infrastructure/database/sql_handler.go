@@ -1,0 +1,53 @@
+package database
+
+import (
+	"fmt"
+	"log"
+	"os"
+
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
+)
+
+type SqlHandler struct {
+	Conn *gorm.DB
+}
+
+func NewSqlHandler() *SqlHandler {
+	dsn := fmt.Sprintf(
+		"%v:%v@tcp(%v:%v)/%v",
+		os.Getenv("DB_USER"),
+		os.Getenv("DB_PASSWORD"),
+		os.Getenv("DB_HOST"),
+		os.Getenv("DB_PORT"),
+		os.Getenv("DB_NAME"),
+	)
+
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+
+	if err != nil {
+		log.Fatal("Error while connecting db")
+	}
+
+	return &SqlHandler{Conn: db}
+}
+
+func (h *SqlHandler) Find(dest interface{}, conds ...interface{}) (tx *gorm.DB) {
+	return h.Conn.Find(dest, conds...)
+}
+
+func (h *SqlHandler) Where(query interface{}, args ...interface{}) (tx *gorm.DB) {
+	return h.Conn.Where(query, args...)
+}
+func (h *SqlHandler) First(dest interface{}, conds ...interface{}) (tx *gorm.DB) {
+	return h.Conn.First(dest, conds...)
+}
+func (h *SqlHandler) Create(value interface{}) (tx *gorm.DB) {
+	return h.Conn.Create(value)
+}
+func (h *SqlHandler) Update(column string, value interface{}) (tx *gorm.DB) {
+	return h.Conn.Update(column, value)
+}
+func (h *SqlHandler) Delete(value interface{}, conds ...interface{}) (tx *gorm.DB) {
+	return h.Conn.Delete(value, conds...)
+}
