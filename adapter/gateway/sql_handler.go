@@ -1,4 +1,4 @@
-package database
+package gateway
 
 import (
 	"fmt"
@@ -32,22 +32,30 @@ func NewSqlHandler() *SqlHandler {
 	return &SqlHandler{Conn: db}
 }
 
-func (h *SqlHandler) Find(dest interface{}, conds ...interface{}) (tx *gorm.DB) {
+func (h *SqlHandler) Find(dest interface{}, conds ...interface{}) *gorm.DB {
 	return h.Conn.Find(dest, conds...)
 }
 
-func (h *SqlHandler) Where(query interface{}, args ...interface{}) (tx *gorm.DB) {
+func (h *SqlHandler) Where(query interface{}, args ...interface{}) *gorm.DB {
 	return h.Conn.Where(query, args...)
 }
-func (h *SqlHandler) First(dest interface{}, conds ...interface{}) (tx *gorm.DB) {
+
+func (h *SqlHandler) First(dest interface{}, conds ...interface{}) *gorm.DB {
 	return h.Conn.First(dest, conds...)
 }
-func (h *SqlHandler) Create(value interface{}) (tx *gorm.DB) {
+
+func (h *SqlHandler) Create(value interface{}) *gorm.DB {
 	return h.Conn.Create(value)
 }
-func (h *SqlHandler) Update(column string, value interface{}) (tx *gorm.DB) {
+
+func (h *SqlHandler) Update(column string, value interface{}) *gorm.DB {
 	return h.Conn.Update(column, value)
 }
-func (h *SqlHandler) Delete(value interface{}, conds ...interface{}) (tx *gorm.DB) {
+
+func (h *SqlHandler) Delete(value interface{}, conds ...interface{}) *gorm.DB {
 	return h.Conn.Delete(value, conds...)
+}
+
+func (h *SqlHandler) Error() error {
+	return h.Conn.Error
 }
