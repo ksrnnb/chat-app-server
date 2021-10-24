@@ -1,9 +1,9 @@
 package entity
 
 type User struct {
-	Id	    int
-	LoginId string
+	Id       int
+	LoginId  string
 	Password string
-	Name 	string
-	Avatar string
+	Name     string
+	Avatar   string
 }

@@ -7,7 +7,8 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	"github.com/ksrnnb/chat-app-server/route"
+	"github.com/ksrnnb/chat-app-server/infrastructure/middleware"
+	"github.com/ksrnnb/chat-app-server/infrastructure/route"
 )
 
 const (
@@ -26,6 +27,7 @@ func main() {
 	config.AllowOrigins = []string{os.Getenv("FRONT_END_URL")}
 
 	router.Use(cors.New(config))
+	router.Use(middleware.NewSessionMiddleware())
 
 	newRouter := route.SetRoute(router)
 

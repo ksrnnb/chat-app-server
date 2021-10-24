@@ -16,7 +16,7 @@ func NewLoginController() LoginController {
 
 func (c LoginController) Login(req request.LoginRequest, interactor usecase.IUserInteractor) *response.Response {
 	in := &usecase.LoginInput{
-		LoginId: req.LoginId,
+		LoginId:  req.LoginId,
 		Password: req.Password,
 	}
 
@@ -24,7 +24,7 @@ func (c LoginController) Login(req request.LoginRequest, interactor usecase.IUse
 
 	if err != nil {
 		return &response.Response{
-			Code: http.StatusUnauthorized,
+			Code:   http.StatusUnauthorized,
 			Params: nil,
 		}
 	}

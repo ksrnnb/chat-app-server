@@ -14,7 +14,7 @@ func (u UserRepository) GetUserByLoginId(loginId string) (*entity.User, error) {
 	var user entity.User
 
 	u.DB.Where("login_id = ?", loginId).First(&user)
-	
+
 	err := u.DB.Error()
 
 	if err != nil {

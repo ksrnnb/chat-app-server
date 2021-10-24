@@ -7,7 +7,7 @@ type IUserInteractor interface {
 }
 
 type LoginInput struct {
-	LoginId string
+	LoginId  string
 	Password string
 }
 
