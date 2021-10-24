@@ -3,14 +3,14 @@ package usecase
 import "github.com/ksrnnb/chat-app-server/entity"
 
 type IUserInteractor interface {
-	GetUserByLoginId(*LoginRequest) (*LoginResponse, error)
+	GetUserByLoginId(*LoginInput) (*LoginOutput, error)
 }
 
-type LoginRequest struct {
-	LoginId string
+type LoginInput struct {
+	LoginId  string
 	Password string
 }
 
-type LoginResponse struct {
+type LoginOutput struct {
 	User *entity.User
 }

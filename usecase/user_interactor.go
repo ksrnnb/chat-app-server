@@ -13,7 +13,7 @@ func NewUserInteractor(u entity.IUserRepository) UserInteractor {
 	return UserInteractor{UserRepository: u}
 }
 
-func (u UserInteractor) GetUserByLoginId(req *LoginRequest) (*LoginResponse, error) {
+func (u UserInteractor) GetUserByLoginId(req *LoginInput) (*LoginOutput, error) {
 	user, err := u.UserRepository.GetUserByLoginId(req.LoginId)
 
 	if err != nil {
@@ -26,5 +26,5 @@ func (u UserInteractor) GetUserByLoginId(req *LoginRequest) (*LoginResponse, err
 		return nil, err
 	}
 
-	return &LoginResponse{User: user}, nil
+	return &LoginOutput{User: user}, nil
 }
