@@ -25,6 +25,7 @@ func main() {
 	router := gin.Default()
 	config := cors.DefaultConfig()
 	config.AllowOrigins = []string{os.Getenv("FRONT_END_URL")}
+	config.AllowCredentials = true
 
 	router.Use(cors.New(config))
 	router.Use(middleware.NewSessionMiddleware())

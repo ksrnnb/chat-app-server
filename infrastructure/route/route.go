@@ -1,6 +1,7 @@
 package route
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -19,6 +20,8 @@ func init() {
 
 func SetRoute(r *gin.Engine) *gin.Engine {
 	r.POST("/login", login)
+	r.GET("/rooms", getRooms)
+	r.GET("/self", getUser)
 	return r
 }
 
@@ -47,6 +50,21 @@ func login(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
+	c.JSON(res.Code, res.Params)
+}
+
+func getRooms(c *gin.Context) {
+	// do something
+	fmt.Println("get rooms")
+
+	s := session.NewSession(c)
+	fmt.Println(s.Get("userId"))
+}
+
+func getUser(c *gin.Context) {
+	interactor := usecase.NewUserInteractor(gateway.NewUserRepository(gateway.NewSqlHandler()))
+	res := loginController.GetUser(session.NewSession(c), interactor)
 
 	c.JSON(res.Code, res.Params)
 }

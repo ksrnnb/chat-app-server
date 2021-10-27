@@ -13,9 +13,19 @@ func NewUserRepository(db *SqlHandler) UserRepository {
 func (u UserRepository) GetUserByLoginId(loginId string) (*entity.User, error) {
 	var user entity.User
 
-	u.DB.Where("login_id = ?", loginId).First(&user)
+	err := u.DB.Where("login_id = ?", loginId).First(&user).Error
 
-	err := u.DB.Error()
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+func (u UserRepository) Find(id int) (*entity.User, error) {
+	var user entity.User
+
+	err := u.DB.First(&user, id).Error
 
 	if err != nil {
 		return nil, err
