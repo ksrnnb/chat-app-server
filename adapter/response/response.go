@@ -2,7 +2,7 @@ package response
 
 type Response struct {
 	Code   int
-	Params map[string]interface{}
+	Params interface{}
 }
 
 func (res *Response) IsSuccessful() bool {

@@ -1,7 +1,6 @@
 package route
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -13,9 +12,11 @@ import (
 )
 
 var loginController controller.LoginController
+var chatRoomController controller.ChatRoomController
 
 func init() {
 	loginController = controller.NewLoginController()
+	chatRoomController = controller.NewChatRoomController()
 }
 
 func SetRoute(r *gin.Engine) *gin.Engine {
@@ -33,6 +34,7 @@ func login(c *gin.Context) {
 		return
 	}
 
+	// TODO: コンテナ管理
 	interactor := usecase.NewUserInteractor(gateway.NewUserRepository(gateway.NewSqlHandler()))
 	res := loginController.Login(req, interactor)
 
@@ -41,10 +43,16 @@ func login(c *gin.Context) {
 		return
 	}
 
+	params, ok := res.Params.(map[string]interface{})
+	if !ok {
+		c.JSON(http.StatusInternalServerError, nil)
+		return
+	}
+
 	// セッションにuserIdを保存。
 	// s.Setを実行すると、sessionIdがSet-Cookieヘッダに付与される
 	s := session.NewSession(c)
-	s.Set("userId", res.Params["id"])
+	s.Set("userId", params["id"])
 
 	if err := s.Save(); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -55,11 +63,18 @@ func login(c *gin.Context) {
 }
 
 func getRooms(c *gin.Context) {
-	// do something
-	fmt.Println("get rooms")
-
 	s := session.NewSession(c)
-	fmt.Println(s.Get("userId"))
+	userId, ok := s.Get("userId").(int)
+
+	if !ok {
+		c.JSON(http.StatusUnauthorized, nil)
+	}
+
+	// TODO: コンテナ管理
+	sqlHandler := gateway.NewSqlHandler()
+	chatRoomInteractor := usecase.NewChatRoomInteractor(gateway.NewChatRoomRepository(sqlHandler))
+
+	chatRoomController.GetChatRooms(chatRoomInteractor, userId)
 }
 
 func getUser(c *gin.Context) {
