@@ -74,7 +74,9 @@ func getRooms(c *gin.Context) {
 	sqlHandler := gateway.NewSqlHandler()
 	chatRoomInteractor := usecase.NewChatRoomInteractor(gateway.NewChatRoomRepository(sqlHandler))
 
-	chatRoomController.GetChatRooms(chatRoomInteractor, userId)
+	res := chatRoomController.GetChatRooms(chatRoomInteractor, userId)
+
+	c.JSON(res.Code, res.Params)
 }
 
 func getUser(c *gin.Context) {

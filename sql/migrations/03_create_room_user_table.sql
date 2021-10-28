@@ -1,4 +1,4 @@
-CREATE TABLE chat_user (
+CREATE TABLE room_user (
     id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
     user_id INTEGER NOT NULL COMMENT 'ユーザーID',
     room_id INTEGER NOT NULL COMMENT 'チャットルームID',
