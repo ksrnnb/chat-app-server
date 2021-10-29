@@ -68,6 +68,7 @@ func getRooms(c *gin.Context) {
 
 	if !ok {
 		c.JSON(http.StatusUnauthorized, nil)
+		return
 	}
 
 	// TODO: コンテナ管理
