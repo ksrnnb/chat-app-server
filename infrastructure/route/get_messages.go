@@ -2,6 +2,7 @@ package route
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/ksrnnb/chat-app-server/adapter/gateway"
@@ -10,8 +11,9 @@ import (
 )
 
 func getMessages(c *gin.Context) {
+	// TODO: 認証のミドルウェアをつくる
 	s := session.NewSession(c)
-	userId, ok := s.Get("userId").(int)
+	_, ok := s.Get("userId").(int)
 
 	if !ok {
 		c.JSON(http.StatusUnauthorized, nil)
@@ -20,9 +22,15 @@ func getMessages(c *gin.Context) {
 
 	// TODO: コンテナ管理
 	sqlHandler := gateway.NewSqlHandler()
-	chatRoomInteractor := usecase.NewChatRoomInteractor(gateway.NewChatRoomRepository(sqlHandler))
+	messageInteractor := usecase.NewMessageInteractor(gateway.NewMessageRepository(sqlHandler))
 
-	res := chatRoomController.GetChatRooms(chatRoomInteractor, userId)
+	roomId, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, nil)
+		
+	}
+
+	res := messageController.GetMessages(messageInteractor, roomId)
 
 	c.JSON(res.Code, res.Params)
 }

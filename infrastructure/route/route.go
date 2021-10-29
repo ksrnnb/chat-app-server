@@ -7,10 +7,12 @@ import (
 
 var loginController controller.LoginController
 var chatRoomController controller.ChatRoomController
+var messageController controller.MessageController
 
 func init() {
 	loginController = controller.NewLoginController()
 	chatRoomController = controller.NewChatRoomController()
+	messageController = controller.NewMessageController()
 }
 
 func SetRoute(r *gin.Engine) *gin.Engine {

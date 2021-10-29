@@ -67,3 +67,7 @@ func (h *SqlHandler) Delete(value interface{}, conds ...interface{}) *gorm.DB {
 func (h *SqlHandler) Error() error {
 	return h.Conn.Error
 }
+
+func (h *SqlHandler) Debug() *gorm.DB {
+	return h.Conn.Debug()
+}
