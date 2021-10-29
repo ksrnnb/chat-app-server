@@ -36,3 +36,30 @@ func (c LoginController) Login(req request.LoginRequest, interactor usecase.IUse
 		},
 	}
 }
+
+func (c LoginController) GetUser (session ISession, interactor usecase.IUserInteractor) *response.Response {
+	id, ok := session.Get("userId").(int)
+
+	if !ok {
+		return &response.Response{
+			Code: http.StatusNotFound,
+		}
+	}
+
+	req := &usecase.FindInput{Id: id}
+
+	res, err := interactor.Find(req)
+
+	if err != nil {
+		return &response.Response{
+			Code: http.StatusNotFound,
+		}
+	}
+
+	return &response.Response{
+		Code: http.StatusOK,
+		Params: map[string]interface{}{
+			"id": res.User.Id,
+		},
+	}
+}

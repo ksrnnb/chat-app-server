@@ -28,3 +28,13 @@ func (u UserInteractor) GetUserByLoginId(req *LoginInput) (*LoginOutput, error) 
 
 	return &LoginOutput{User: user}, nil
 }
+
+func (u UserInteractor) Find(req *FindInput) (*FindOutput, error) {
+	user, err := u.UserRepository.Find(req.Id)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &FindOutput{User: user}, nil
+}

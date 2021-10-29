@@ -32,6 +32,14 @@ func NewSqlHandler() *SqlHandler {
 	return &SqlHandler{Conn: db}
 }
 
+func (h *SqlHandler) Preload(query string, args ...interface{}) (*gorm.DB) {
+	return h.Conn.Preload(query, args...)
+}
+
+func (h *SqlHandler) Select(query interface{}, args ...interface{}) (*gorm.DB) {
+	return h.Conn.Select(query, args...)
+}
+
 func (h *SqlHandler) Find(dest interface{}, conds ...interface{}) *gorm.DB {
 	return h.Conn.Find(dest, conds...)
 }
