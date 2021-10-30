@@ -78,7 +78,11 @@ func (r ChatRoomRepository) getRoomIdsByUserId(userId int) ([]int, error) {
 // roomIdからルームと関連するユーザーを取得
 func (r ChatRoomRepository) getChatRoomsWithUsers(roomIds []int) ([]*entity.ChatRoom, error) {
 	var rooms []*ChatRoom
-	err := r.DB.Preload("Users").Where(roomIds).Find(&rooms).Error
+	err := r.DB.Preload("Messages.User").
+				Preload("Users").
+				Where(roomIds).
+				Find(&rooms).
+				Error
 
 	if err != nil {
 		return nil, err
