@@ -2,6 +2,7 @@ package gateway
 
 import (
 	"github.com/ksrnnb/chat-app-server/entity"
+	"gorm.io/gorm"
 )
 
 type ChatRoomRepository struct {
@@ -12,6 +13,7 @@ type ChatRoom struct {
 	Id    int
 	Name  string
 	Users []*entity.User `gorm:"many2many:room_user;joinForeignKey:room_id"`
+	Messages []*entity.Message `gorm:"foreignKey:room_id"`
 }
 
 type RoomUser struct {
@@ -36,6 +38,23 @@ func (r ChatRoomRepository) GetAllChatRooms(userId int) ([]*entity.ChatRoom, err
 	}
 
 	return r.getChatRoomsWithUsers(roomIds)
+}
+
+func (r ChatRoomRepository) GetChatRoom(roomId int) (*entity.ChatRoom, error) {
+	var room *ChatRoom
+	err := r.DB.
+			Preload("Messages.User").
+			Where("id = ?", roomId).
+			Find(&room).
+			Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	entityRoom := toEntityChatRoom(room)
+
+	return entityRoom, nil
 }
 
 // roomIdを取得する
@@ -70,17 +89,30 @@ func (r ChatRoomRepository) getChatRoomsWithUsers(roomIds []int) ([]*entity.Chat
 	return entityRooms, nil
 }
 
+// 認証情報は取得しない
+func (r ChatRoomRepository) selectWithoutCredentials(db *gorm.DB) *gorm.DB {
+	return db.Select("id, name, avatar")
+}
+
 // gatewayのChatRoomからentityのChatRoomへ変換
 func toEntityChatRooms(chatRooms []*ChatRoom) (entityChatRooms []*entity.ChatRoom) {
 	for _, chatRoom := range chatRooms {
-		newEntityChatRoom := &entity.ChatRoom{
-			Id: chatRoom.Id,
-			Name: chatRoom.Name,
-			Users: chatRoom.Users,
-		}
+		newEntityChatRoom := toEntityChatRoom(chatRoom)
 
 		entityChatRooms = append(entityChatRooms, newEntityChatRoom)
 	}
 
 	return entityChatRooms
+}
+
+// gatewayのChatRoomからentityのChatRoomへ変換
+func toEntityChatRoom(chatRoom *ChatRoom) (*entity.ChatRoom) {
+	entityChatRoom := &entity.ChatRoom{
+		Id: chatRoom.Id,
+		Name: chatRoom.Name,
+		Users: chatRoom.Users,
+		Messages: chatRoom.Messages,
+	}
+
+	return entityChatRoom
 }
