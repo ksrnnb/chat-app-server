@@ -27,3 +27,17 @@ func (interactor *ChatRoomInteractor) GetAllChatRooms(req *GetChatRoomsRequest) 
 
 	return res, nil
 }
+
+func (interactor *ChatRoomInteractor) GetChatRoom(req *GetChatRoomRequest) (*GetChatRoomResponse, error) {
+	room, err := interactor.ChatRoomRepository.GetChatRoom(req.RoomId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	res := &GetChatRoomResponse{
+		Room: room,
+	}
+
+	return res, nil
+}

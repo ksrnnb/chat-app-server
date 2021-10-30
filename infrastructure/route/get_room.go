@@ -10,7 +10,7 @@ import (
 	"github.com/ksrnnb/chat-app-server/usecase"
 )
 
-func getMessages(c *gin.Context) {
+func getRoom(c *gin.Context) {
 	// TODO: 認証のミドルウェアをつくる
 	s := session.NewSession(c)
 	_, ok := s.Get("userId").(int)
@@ -22,7 +22,7 @@ func getMessages(c *gin.Context) {
 
 	// TODO: コンテナ管理
 	sqlHandler := gateway.NewSqlHandler()
-	messageInteractor := usecase.NewMessageInteractor(gateway.NewMessageRepository(sqlHandler))
+	roomInteractor := usecase.NewChatRoomInteractor(gateway.NewChatRoomRepository(sqlHandler))
 
 	roomId, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -30,7 +30,7 @@ func getMessages(c *gin.Context) {
 		
 	}
 
-	res := messageController.GetMessages(messageInteractor, roomId)
+	res := chatRoomController.GetRoom(roomInteractor, roomId)
 
 	c.JSON(res.Code, res.Params)
 }

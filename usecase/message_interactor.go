@@ -13,17 +13,3 @@ func NewMessageInteractor(r entity.IMessageRepository) *MessageInteractor {
 		MessageRepository: r,
 	}
 }
-
-func (interactor *MessageInteractor) GetMessages(req *GetMessagesRequest) (*GetMessagesResponse, error) {
-	messages, err := interactor.MessageRepository.GetMessages(req.RoomId)
-
-	if err != nil {
-		return nil, err
-	}
-
-	res := &GetMessagesResponse{
-		Messages: messages,
-	}
-
-	return res, nil
-}
