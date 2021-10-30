@@ -11,23 +11,24 @@ import (
 type ChatRoomController struct {}
 
 type ChatRoom struct {
-	Id int
-	Name string
-	Messages []*Message
+	Id int `json:"id"`
+	Name string `json:"name"`
+	Users []*User `json:"users"`
+	Messages []*Message `json:"messages"`
 }
 
 type Message struct {
-	Id int
-	RoomId int
-	UserId int
-	Text string
-	User *User
+	Id int `json:"id"`
+	RoomId int `json:"roomId"`
+	UserId int `json:"userId"`
+	Text string `json:"text"`
+	User *User `json:"user"`
 }
 
 type User struct {
-	Id int
-	Name string
-	Avatar string
+	Id int `json:"id"`
+	Name string `json:"name"`
+	Avatar string `json:"avatar"`
 }
 
 func NewChatRoomController() ChatRoomController {
@@ -42,7 +43,7 @@ func (c ChatRoomController) GetChatRooms(interactor usecase.IChatRoomInteractor,
 		return &response.Response{Code: http.StatusNotFound, Params: nil}
 	}
 
-	params := c.toSuitableFormat(res.ChatRooms)
+	params := c.toSuitableChatRoomsFormat(res.ChatRooms)
 
 	return &response.Response{Code: http.StatusOK, Params: params}
 }
@@ -55,7 +56,7 @@ func (c ChatRoomController) GetRoom(interactor usecase.IChatRoomInteractor, room
 		return &response.Response{Code: http.StatusNotFound, Params: nil}
 	}
 
-	room := c.removeCredentials(res.Room)
+	room := c.toSuitableChatRoomFormat(res.Room)
 	return &response.Response{Code: http.StatusOK, Params: room}
 }
 
@@ -71,47 +72,23 @@ func (c ChatRoomController) GetRoom(interactor usecase.IChatRoomInteractor, room
 //             {
 //                 ...
 //             },
-func (c ChatRoomController) toSuitableFormat(chatRooms []*entity.ChatRoom) []map[string]interface{} {
-	var res []map[string]interface{}
+func (c ChatRoomController) toSuitableChatRoomsFormat(chatRooms []*entity.ChatRoom) []*ChatRoom {
+	var res []*ChatRoom
 
 	for _, room := range chatRooms {
-		formatRoom := make(map[string]interface{})
-		users := c.toSuitableUsersFormat(room.Users)
-		formatRoom["id"] = room.Id
-		formatRoom["name"] = room.Name
-		formatRoom["users"] = users
-
+		formatRoom := c.toSuitableChatRoomFormat(room)
 		res = append(res, formatRoom)
 	}
 
 	return res
 }
 
-// ユーザーの構造体から必要なフィールドだけ抽出
-func (c ChatRoomController) toSuitableUsersFormat(users []*entity.User) []map[string]interface{} {
-	var res []map[string]interface{}
-
-	for _, user := range users {
-		formatUser := make(map[string]interface{})
-		formatUser["id"] = user.Id
-		formatUser["name"] = user.Name
-		formatUser["avatar"] = user.Avatar
-		res = append(res, formatUser)
-	}
-
-	return res
-}
-
-// ログインIDとパスワードを除く
-func (c ChatRoomController) removeCredentials(room *entity.ChatRoom) *ChatRoom {
+// チャットルームの変換
+func (c ChatRoomController) toSuitableChatRoomFormat(room *entity.ChatRoom) *ChatRoom {
 	var newMessages []*Message
 
 	for _, message := range room.Messages {
-		newUser := &User{
-			Id: message.User.Id,
-			Name: message.User.Name,
-			Avatar: message.User.Avatar,
-		}
+		newUser := c.toSuitableUserFormat(message.User)
 
 		newMessage := &Message{
 			Id: message.Id,
@@ -124,11 +101,39 @@ func (c ChatRoomController) removeCredentials(room *entity.ChatRoom) *ChatRoom {
 		newMessages = append(newMessages, newMessage)
 	}
 
+	users := c.toSuitableUsersFormat(room.Users)
 	newRoom := &ChatRoom{
 		Id: room.Id,
 		Name: room.Name,
 		Messages: newMessages,
+		Users: users,
 	}
 
 	return newRoom
+}
+
+// ユーザーの構造体から必要なフィールドだけ抽出
+func (c ChatRoomController) toSuitableUsersFormat(users []*entity.User) []*User {
+	var res []*User
+
+	for _, user := range users {
+		formatUser := c.toSuitableUserFormat(user)
+		res = append(res, formatUser)
+	}
+
+	return res
+}
+
+func (c ChatRoomController) toSuitableUserFormat(entityUser *entity.User) *User {
+	if entityUser == nil {
+		return nil
+	}
+
+	newUser := &User{
+		Id: entityUser.Id,
+		Name: entityUser.Name,
+		Avatar: entityUser.Avatar,
+	}
+
+	return newUser
 }
