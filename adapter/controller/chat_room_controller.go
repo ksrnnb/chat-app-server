@@ -62,16 +62,6 @@ func (c ChatRoomController) GetRoom(interactor usecase.IChatRoomInteractor, room
 
 // ルームの構造体から必要なフィールドだけ抽出
 // エンティティ層にJSONの記述はしたくない
-// 構造体のままだと以下のようなレスポンスとなる
-// {
-// "ChatRooms": [
-//     {
-//         "Id": 1,
-//         "Name": "chat room 1",
-//         "Users": [
-//             {
-//                 ...
-//             },
 func (c ChatRoomController) toSuitableChatRoomsFormat(chatRooms []*entity.ChatRoom) []*ChatRoom {
 	var res []*ChatRoom
 

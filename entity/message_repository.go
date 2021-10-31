@@ -1,5 +1,5 @@
 package entity
 
 type IMessageRepository interface {
-	GetMessages(int) ([]*Message, error)
+	SendMessage(roomId int, userId int, message string) (*Message, error)
 }

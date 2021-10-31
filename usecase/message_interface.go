@@ -4,13 +4,15 @@ import "github.com/ksrnnb/chat-app-server/entity"
 
 
 type IMessageInteractor interface {
-	GetMessages(*GetMessagesRequest) (*GetMessagesResponse, error)
+	SendMessage(*SendMessageRequest) (*SendMessageResponse, error)
 }
 
-type GetMessagesRequest struct {
+type SendMessageRequest struct {
 	RoomId int
+	UserId int
+	Text string
 }
 
-type GetMessagesResponse struct {
-	Messages []*entity.Message
+type SendMessageResponse struct {
+	Message *entity.Message
 }

@@ -20,5 +20,6 @@ func SetRoute(r *gin.Engine) *gin.Engine {
 	r.GET("/rooms", getRooms)
 	r.GET("/self", getUser)
 	r.GET("/rooms/:id", getRoom)
+	r.POST("/rooms/:id", sendMessage)
 	return r
 }
