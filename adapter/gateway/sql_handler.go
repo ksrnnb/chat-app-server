@@ -32,6 +32,16 @@ func NewSqlHandler() *SqlHandler {
 	return &SqlHandler{Conn: db}
 }
 
+// connectionをcloseする
+func (h *SqlHandler) Close() error {
+	conn, err := h.Conn.DB()
+	if err != nil {
+		return err
+	}
+
+	return conn.Close()
+}
+
 func (h *SqlHandler) Preload(query string, args ...interface{}) (*gorm.DB) {
 	return h.Conn.Preload(query, args...)
 }

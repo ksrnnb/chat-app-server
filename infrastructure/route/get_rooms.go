@@ -20,6 +20,8 @@ func getRooms(c *gin.Context) {
 
 	// TODO: コンテナ管理
 	sqlHandler := gateway.NewSqlHandler()
+	defer sqlHandler.Close()
+
 	chatRoomInteractor := usecase.NewChatRoomInteractor(gateway.NewChatRoomRepository(sqlHandler))
 
 	res := chatRoomController.GetChatRooms(chatRoomInteractor, userId)

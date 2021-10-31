@@ -22,6 +22,7 @@ func getRoom(c *gin.Context) {
 
 	// TODO: コンテナ管理
 	sqlHandler := gateway.NewSqlHandler()
+	defer sqlHandler.Close()
 	roomInteractor := usecase.NewChatRoomInteractor(gateway.NewChatRoomRepository(sqlHandler))
 
 	roomId, err := strconv.Atoi(c.Param("id"))

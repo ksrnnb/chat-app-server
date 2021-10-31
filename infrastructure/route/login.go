@@ -19,7 +19,9 @@ func login(c *gin.Context) {
 	}
 
 	// TODO: コンテナ管理
-	interactor := usecase.NewUserInteractor(gateway.NewUserRepository(gateway.NewSqlHandler()))
+	sqlHandler := gateway.NewSqlHandler()
+	defer sqlHandler.Close()
+	interactor := usecase.NewUserInteractor(gateway.NewUserRepository(sqlHandler))
 	res := loginController.Login(req, interactor)
 
 	if !res.IsSuccessful() {
