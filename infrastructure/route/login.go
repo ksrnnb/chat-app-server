@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"github.com/ksrnnb/chat-app-server/adapter/gateway"
 	"github.com/ksrnnb/chat-app-server/adapter/request"
 	"github.com/ksrnnb/chat-app-server/infrastructure/session"
@@ -13,7 +14,7 @@ import (
 func login(c *gin.Context) {
 	var req request.LoginRequest
 
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err := c.ShouldBindBodyWith(&req, binding.JSON); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
