@@ -7,6 +7,11 @@ import (
 
 type Session struct {
 	session sessions.Session
+	options sessions.Options
+}
+
+type Options struct {
+	sessions.Options
 }
 
 func NewSession(c *gin.Context) *Session {
@@ -24,4 +29,9 @@ func (s *Session) Set(key string, value interface{}) {
 
 func (s *Session) Save() error {
 	return s.session.Save()
+}
+
+func (s *Session) Disable() error {
+	s.session.Clear()
+	return s.Save()
 }
