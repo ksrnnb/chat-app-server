@@ -3,6 +3,7 @@ package route
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/ksrnnb/chat-app-server/adapter/controller"
+	"github.com/ksrnnb/chat-app-server/infrastructure/middleware"
 )
 
 var loginController controller.LoginController
@@ -20,11 +21,17 @@ func init() {
 }
 
 func SetRoute(r *gin.Engine) *gin.Engine {
-	r.POST("/login", login)
-	r.POST("/logout", logout)
 	r.GET("/rooms", getRooms)
 	r.GET("/self", getUser)
 	r.GET("/rooms/:id", getRoom)
-	r.POST("/rooms/:id", sendMessage)
+
+	csrfRouter := r.Group("/")
+	{
+		csrfRouter.Use(middleware.Csrf())
+		csrfRouter.POST("/login", login)
+		csrfRouter.POST("/logout", logout)
+		csrfRouter.POST("/rooms/:id", sendMessage)
+	}
+
 	return r
 }
