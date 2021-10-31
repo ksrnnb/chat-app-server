@@ -29,6 +29,7 @@ func sendMessage(c *gin.Context) {
 
 	// TODO: コンテナ管理
 	sqlHandler := gateway.NewSqlHandler()
+	defer sqlHandler.Close()
 	MessageInteractor := usecase.NewMessageInteractor(gateway.NewMessageRepository(sqlHandler))
 
 	roomId, err := strconv.Atoi(c.Param("id"))

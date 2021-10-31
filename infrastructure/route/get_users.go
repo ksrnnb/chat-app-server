@@ -9,7 +9,10 @@ import (
 
 
 func getUser(c *gin.Context) {
-	interactor := usecase.NewUserInteractor(gateway.NewUserRepository(gateway.NewSqlHandler()))
+	sqlHandler := gateway.NewSqlHandler()
+	defer sqlHandler.Close()
+
+	interactor := usecase.NewUserInteractor(gateway.NewUserRepository(sqlHandler))
 	res := userController.GetUser(session.NewSession(c), interactor)
 
 	c.JSON(res.Code, res.Params)
