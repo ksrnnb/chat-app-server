@@ -5,4 +5,3 @@ type ISession interface {
 	Set(key string, value interface{})
 	Save() error	
 }
-
