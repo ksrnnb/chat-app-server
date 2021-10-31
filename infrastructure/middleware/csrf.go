@@ -4,11 +4,12 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"github.com/ksrnnb/chat-app-server/infrastructure/session"
 )
 
 type csrfRequest struct {
-	csrfToken string
+	CsrfToken string `json:"token"`
 }
 
 func Csrf() gin.HandlerFunc {
@@ -22,12 +23,12 @@ func Csrf() gin.HandlerFunc {
 		}
 
 		var req csrfRequest
-		if err := c.ShouldBindJSON(&req); err != nil {
+		if err := c.ShouldBindBodyWith(&req, binding.JSON); err != nil {
 			abort(c)
 			return
 		}
 
-		if token != req.csrfToken {
+		if token != req.CsrfToken {
 			abort(c)
 			return
 		}
